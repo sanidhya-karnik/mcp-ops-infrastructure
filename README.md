@@ -40,7 +40,7 @@ A production-ready Model Context Protocol (MCP) server demonstrating secure, sch
 ### 1. Clone and Configure
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/sanidhya-karnik/mcp-ops-infrastructure
 cd mcp-ops-infrastructure
 
 # Copy environment template
