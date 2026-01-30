@@ -1,0 +1,83 @@
+@startuml MCP Operations Architecture
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+
+' Styling
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #333333
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #4A90A4
+    FontColor #FFFFFF
+    BorderColor #2C5F6E
+    roundCorner 10
+}
+
+skinparam rectangle {
+    BackgroundColor #6BB3A2
+    FontColor #FFFFFF
+    BorderColor #3D8B78
+    roundCorner 8
+}
+
+skinparam database {
+    BackgroundColor #E8B86D
+    FontColor #333333
+    BorderColor #C9943D
+}
+
+skinparam cloud {
+    BackgroundColor #D4A5D9
+    FontColor #333333
+    BorderColor #A66DAD
+}
+
+skinparam arrow {
+    Color #555555
+    Thickness 1.5
+}
+
+' Layout
+package "MCP Client" as clientpkg #E8F4F8 {
+    rectangle "Claude / LLM" as client #5B9BD5
+}
+
+package "MCP Operations Server" as serverpkg #F5F5F5 {
+    component "Auth Layer" as auth #4A90A4
+    component "Schema Validation" as schema #4A90A4
+    
+    package "Tools" as toolspkg #FFFFFF {
+        rectangle "Audit Logger" as audit #6BB3A2
+        rectangle "Audit View" as auditview #6BB3A2
+        rectangle "SQL Query" as sql #6BB3A2
+        rectangle "Search (Tavily)" as search #6BB3A2
+        rectangle "Weather (Open-Meteo)" as weather #6BB3A2
+    }
+}
+
+database "PostgreSQL\n(Audit Logs)" as postgres
+database "SQLite\n(Operations)" as sqlite
+cloud "Tavily API" as tavily
+cloud "Open-Meteo API" as meteo
+
+' Connections
+client --> auth : "  API Key  "
+auth --> schema
+schema --> audit
+schema --> auditview
+schema --> sql
+schema --> search
+schema --> weather
+
+audit --> postgres
+auditview --> postgres
+sql --> sqlite
+search --> tavily
+weather --> meteo
+
+@enduml

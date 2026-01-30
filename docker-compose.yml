@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for audit logging
+  postgres:
+    image: postgres:15-alpine
+    container_name: mcp-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mcp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_password}
+      POSTGRES_DB: ${POSTGRES_DB:-mcp_audit}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mcp_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # MCP Operations Server
+  mcp-server:
+    build: .
+    container_name: mcp-ops-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Server config
+      SERVER_NAME: mcp-ops-server
+      DEBUG: ${DEBUG:-false}
+      
+      # Database
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-mcp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mcp_password}
+      POSTGRES_DB: ${POSTGRES_DB:-mcp_audit}
+      SQLITE_PATH: /app/data/operations.db
+      
+      # Auth
+      AUTH_ENABLED: ${AUTH_ENABLED:-true}
+      API_KEYS: ${API_KEYS:-}
+      
+      # External APIs
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      
+      # Audit
+      AUDIT_ENABLED: ${AUDIT_ENABLED:-true}
+      AUDIT_RETENTION_DAYS: 90
+    volumes:
+      - sqlite_data:/app/data
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  sqlite_data:
