@@ -91,6 +91,13 @@ docker-compose up -d postgres
 python -m src.server
 ```
 
+### 5. Verify Installation
+```bash
+python tests/test_local.py
+```
+
+This tests database initialization, SQL queries, geocoding, and weather API integration.
+
 ## Architecture
 
 ![Architecture Diagram](docs/architecture.png)

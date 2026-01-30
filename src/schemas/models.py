@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, field_serializer, ConfigDict
 
 
 # ============== Auth Schemas ==============
@@ -26,8 +26,7 @@ class AuthContext(BaseModel):
     api_key_hash: str = Field(..., min_length=8)
     authenticated_at: datetime = Field(default_factory=datetime.utcnow)
     
-    class Config:
-        frozen = True  # Immutable after creation
+    model_config = ConfigDict(frozen=True)
 
 
 # ============== Tool Input Schemas ==============
@@ -196,10 +195,9 @@ class AuditEntry(BaseModel):
     execution_time_ms: float
     ip_address: Optional[str] = None
     
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
+    @field_serializer('timestamp')
+    def serialize_datetime(self, v: datetime) -> str:
+        return v.isoformat()
 
 
 # ============== Error Schemas ==============
